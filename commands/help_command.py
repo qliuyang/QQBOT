@@ -1,4 +1,3 @@
-
 import nonebot
 from nonebot import on_command
 from nonebot.rule import to_me
@@ -8,7 +7,6 @@ from .utils import is_allowed_group
 
 
 def register_help_command():
-    # 添加帮助命令
     help_cmd = on_command("帮助", rule=to_me() & is_allowed_group)
 
     @help_cmd.handle()

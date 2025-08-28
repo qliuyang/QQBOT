@@ -8,7 +8,6 @@ import random
 from .utils import is_allowed_group
 
 def register_joke_command():
-    # 添加笑话功能
     joke_cmd = on_command("笑话", rule=to_me() & is_allowed_group)
 
     @joke_cmd.handle()

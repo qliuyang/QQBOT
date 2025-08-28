@@ -10,20 +10,32 @@ from PIL import Image
 from .utils import is_allowed_group
 
 def register_avatar_command():
-    # 添加QQ个性头像功能
+    """
+    注册QQ头像生成功能的命令处理器。
+    命令触发词："头像"
+    触发条件：@机器人且在允许的群组中
+    """
     avatar_cmd = on_command("头像", rule=to_me() & is_allowed_group)
 
     @avatar_cmd.handle()
     async def avatar_command(event: GroupMessageEvent):
+        """
+        处理QQ头像生成请求。
+        
+        参数:
+            event (GroupMessageEvent): 群消息事件对象
+        """
+        # 获取用户QQ号
         qq_number = event.sender.user_id
         
         # 记录日志
         nonebot.logger.info(f"收到QQ头像生成请求，来自群组: {event.group_id}, 用户: {event.sender.nickname}({event.sender.user_id})，目标QQ: {qq_number}")
         
         try:
+            # 发送头像生成中提示消息
             await avatar_cmd.send(ERROR_MESSAGES["avatar_generating"])
             
-            # 四个API地址
+            # 构建四个API地址
             api_urls = [
                 API_URLS["avatar_base"].format(index=1, qq=qq_number),
                 API_URLS["avatar_base"].format(index=2, qq=qq_number),
@@ -38,6 +50,7 @@ def register_avatar_command():
             async with httpx.AsyncClient() as client:
                 for i, url in enumerate(api_urls):
                     try:
+                        # 获取图片链接
                         response = await client.get(url, timeout=10.0)
                         data = response.json()
                         
@@ -48,12 +61,15 @@ def register_avatar_command():
                             if image_response.status_code == 200:
                                 images.append(Image.open(BytesIO(image_response.content)))
                             else:
+                                # 下载失败提示
                                 await avatar_cmd.send(ERROR_MESSAGES["avatar_download_failed"].format(index=i+1))
                                 return
                         else:
+                            # API调用失败提示
                             await avatar_cmd.send(ERROR_MESSAGES["avatar_link_failed"].format(index=i+1, msg=data['msg']))
                             return
                     except Exception as e:
+                        # 出错提示
                         await avatar_cmd.send(ERROR_MESSAGES["avatar_error"].format(index=i+1, error=str(e)))
                         return
             
@@ -89,5 +105,7 @@ def register_avatar_command():
             os.remove(temp_path)
             
         except Exception as e:
+            # 记录错误日志
             nonebot.logger.error(f"生成QQ头像时出错: {str(e)}")
+            # 发送错误提示
             await avatar_cmd.send(ERROR_MESSAGES["avatar_generation_error"].format(error=str(e)))

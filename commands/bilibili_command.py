@@ -8,7 +8,6 @@ import httpx
 from .utils import is_allowed_group
 
 def register_bilibili_command():
-    # 添加B站用户信息查询功能
     bilibili_cmd = on_command("bilibili", rule=to_me() & is_allowed_group)
 
     @bilibili_cmd.handle()

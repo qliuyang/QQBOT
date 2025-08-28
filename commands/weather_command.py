@@ -9,7 +9,7 @@ import random
 from .utils import is_allowed_group
 
 def register_weather_command():
-    # 添加天气查询功能
+    """注册天气查询命令处理器"""
     weather_cmd = on_command("天气", rule=to_me() & is_allowed_group)
 
     @weather_cmd.handle()
@@ -24,7 +24,6 @@ def register_weather_command():
         
         # 调用天气API
         try:
-            # 根据示例API URL格式构造请求URL
             if city == "滕州":
                 url = API_URLS["weather_special_tengzhou"]
             else:
@@ -38,8 +37,8 @@ def register_weather_command():
                     city_name = data["data"]["city"]
                     weather_data = data["data"]["data"]
                     
-                    # 构造天气信息
-                    weather_info = f"🏙 {city_name} 近期天气预报：\n\n"
+                    # 格式化天气信息展示
+                    weather_info = f"🏙 {city_name} 近期天气预报：\n\n"  # noqa: E501
                     for i, day in enumerate(weather_data[:3]):  # 只显示最近3天
                         date = day["date"]
                         temperature = day["temperature"]
@@ -52,7 +51,7 @@ def register_weather_command():
                 else:
                     await weather_cmd.send(ERROR_MESSAGES["weather_api_failed"].format(msg=data['msg']))
         except Exception as e:
-            # 出现异常时回退到模拟天气数据
+            # 网络请求异常时使用模拟数据作为回退方案
             await weather_cmd.send(ERROR_MESSAGES["weather_request_failed"])
             weathers = ["晴天", "多云", "阴天", "小雨", "大雨", "雪天"]
             temperature = random.randint(-10, 35)

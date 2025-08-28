@@ -14,7 +14,15 @@ from .utils import is_allowed_group
 
 
 async def call_turing_api(question: str) -> Optional[str]:
-    """调用图灵API"""
+    """
+    调用图灵API并返回响应结果
+    
+    参数:
+        question (str): 用户提出的问题
+        
+    返回:
+        Optional[str]: 图灵API返回的回答，如果请求失败则返回None
+    """
     async with httpx.AsyncClient() as client:
         try:
             nonebot.logger.info("正在向图灵API发送请求")
@@ -53,13 +61,32 @@ async def call_turing_api(question: str) -> Optional[str]:
             return None
 
 def register_ai_command():
-    """注册AI问答命令处理器"""
+    """
+    注册AI问答命令处理器
+    
+    注册以下命令:
+        - ai: 处理用户提出的AI问答请求
+        - ai帮助: 提供AI问答命令的使用帮助
+    """
     ai_cmd = on_command("ai", rule=to_me() & is_allowed_group)
     help_cmd = on_command("ai帮助", rule=to_me() & is_allowed_group)
 
     @ai_cmd.handle()
     async def handle_ai_command(event: GroupMessageEvent | PrivateMessageEvent, args: Message = CommandArg()):
-        """处理AI问答命令"""
+        """
+        处理AI问答命令
+        
+        参数:
+            event (GroupMessageEvent | PrivateMessageEvent): 消息事件对象
+            args (Message): 命令参数，包含用户提出的问题
+            
+        流程:
+            1. 提取用户问题
+            2. 记录日志
+            3. 调用图灵API获取回答
+            4. 构建并发送回复消息
+            5. 处理异常和错误情况
+        """
         # 获取用户问题
         question = args.extract_plain_text().strip()
         
